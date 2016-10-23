@@ -115,21 +115,29 @@ void abb_destruir(abb_t *arbol) {
 
 abb_iter_t *abb_iter_in_crear(const abb_t *arbol) {
 	abb_iter_t* iter = malloc(sizeof(abb_iter_t));
+	if(!iter) return NULL;
 	pila_t* pila = malloc(sizeof(pila_t));
+	if(!pila) {
+		free(iter);
+		return NULL;
+	}
 	iter->pila = pila;
 	nodo_abb_t* act = arbol->raiz;
-	pila_apilar(iter->pilapila, arbol->raiz);
-	
+	while(act->izq) {
+		pila_apilar(iter->pila, act->clave);
+		act = act->izq;
+	}
+	return iter;
 }
 
 bool abb_iter_in_avanzar(abb_iter_t *iter) {
 	if(abb_iter_al_final(iter)) return false;
 	nodo_abb_t* ant = pila_desapilar(iter->pila);
 	if(ant->der) {
-		pila_apilar(iter->pila, ant->der);
+		pila_apilar(iter->pila, ant->der->clave);
 		nodo_abb_t* act = ant->der->izq;
 		while(act) {
-			pila_apilar(iter->pila, act);
+			pila_apilar(iter->pila, act->clave);
 			act = act->izq;
 		}
 	}
@@ -137,15 +145,25 @@ bool abb_iter_in_avanzar(abb_iter_t *iter) {
 }
 
 const char *abb_iter_in_ver_actual(const abb_iter_t *iter) {
+	if(abb_iter_in_al_final(iter)) return NULL;
+	return pila_ver_tope(iter->pila);
 }
 
 bool abb_iter_in_al_final(const abb_iter_t *iter) {
+	return pila_esta_vacia(iter->pila);
 }
 
 void abb_iter_in_destruir(abb_iter_t* iter) {
+	free(iter->pila);
+	free(iter);
 }
 
 //PRIMITIVA DEL ITERADOR INTERNO DEL ÁRBOL.
 
 void abb_in_order(abb_t *arbol, bool visitar(const char *, void *, void *), void *extra) {
+	nodo_abb_t* act = arbol->raiz;
+	while(act->izq) act = act->izq;
+	while(aux && visitar(act->clave, *, *)) {
+
+		act = aux->sig;
 }
