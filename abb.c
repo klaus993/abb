@@ -2,6 +2,7 @@
 #include "pila.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
 /*Definición del struct nodo para la tabla de hash. */
 typedef struct nodo_abb {
@@ -54,7 +55,7 @@ void _liberar_datos_y_nodos(nodo_abb_t *nodo) {
 	if(!arbol) return;
 	_liberar_datos_y_nodos(nodo->izq);
 	_liberar_datos_y_nodos(nodo->der);
-	if(arbol->f_dest) arbol->f_dest(nodo->valor);
+	if(arbol->dest) arbol->dest(nodo->valor);
 	free(nodo->clave);
 	free(nodo);
 }
@@ -66,22 +67,22 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato) {
 	if(!arbol) return NULL;
 	arbol->raiz = NULL;
 	arbol->cantidad = 0;
-	arbol->f_dest = destruir_dato;
-	arbol->f_cmp = cmp;
-	return abb;
+	arbol->dest = destruir_dato;
+	arbol->cmp = cmp;
+	return arbol;
 }
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
-	abb_t** padre;
-	nodo_abb_t* nodo = buscar_nodo(arbol->raiz, arbol, clave, padre);
+	nodo_abb_t** padre;
+	nodo_abb_t* nodo = buscar_nodo(arbol->raiz, arbol->cmp, clave, padre);
 	if(!nodo) {
 		nodo_abb_t* nodo_nuevo = crear_nodo(clave, dato);
 		if(!nodo_nuevo) return false;
-		if(arbol->cmp(clave, nodo->clave) < 0) *(padre)->izq = nodo_nuevo;
-		*(padre)->der = nodo_nuevo;
+		if(arbol->cmp(clave, nodo->clave) < 0) (*padre)->izq = nodo_nuevo;
+		(*padre)->der = nodo_nuevo;
 	}
 	else{
-		if(arbol->f_dest) arbol->f_dest(nodo->valor);
+		if(arbol->dest) arbol->dest(nodo->valor);
 		nodo->valor = dato;
 	}
 	return true;
@@ -91,14 +92,14 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 }
 
 void *abb_obtener(const abb_t *arbol, const char *clave) {
-	nodo_abb_t* nodo = buscar_nodo(arbol->raiz, arbol, clave, NULL);
+	nodo_abb_t* nodo = buscar_nodo(arbol->raiz, arbol->cmp, clave, NULL);
 	if(!nodo) return NULL;
 	return nodo->valor;
 	
 }	
 
 bool abb_pertenece(const abb_t *arbol, const char *clave) {
-	nodo_abb_t* nodo = buscar_nodo(arbol->raiz, arbol, clave, NULL);
+	nodo_abb_t* nodo = buscar_nodo(arbol->raiz, arbol->cmp, clave, NULL);
 	return nodo;
 }
 
