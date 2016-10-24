@@ -401,7 +401,7 @@ void pruebas_abb_alumno()
     //prueba_abb_insertar();
     //prueba_abb_reemplazar();
     //prueba_abb_reemplazar_con_destruir();
-    //prueba_abb_borrar();
+    prueba_abb_borrar();
     prueba_abb_clave_vacia();
     //prueba_abb_valor_null();
     //prueba_abb_volumen(5000, true);

@@ -72,36 +72,41 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato) {
 }
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
-	nodo_abb_t** padre = NULL;
-	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, padre);
-	if(!nodo) {
-		nodo_abb_t* nodo_nuevo = crear_nodo(clave, dato);
-		if(!nodo_nuevo) return false;
-		if(arbol->cmp(clave, nodo->clave) < 0) (*padre)->izq = nodo_nuevo;
-		(*padre)->der = nodo_nuevo;
-	}
+	nodo_abb_t* nodo_nuevo = crear_nodo(clave, dato);
+	if(!nodo_nuevo) return false;
+	if(!arbol->raiz) arbol->raiz = nodo_nuevo;
 	else{
-		if(arbol->dest) arbol->dest(nodo->valor);
-		nodo->valor = dato;
+		nodo_abb_t* padre = NULL;
+		nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
+		if(!nodo) {
+			if(arbol->cmp(clave, nodo->clave) < 0) padre->izq = nodo_nuevo;
+			else padre->der = nodo_nuevo;
+		}
+		else{
+			if(arbol->dest) arbol->dest(nodo->valor);
+			nodo->valor = dato;
+		}
 	}
+	arbol->cantidad++;
 	return true;
 }
 
 void *abb_borrar(abb_t *arbol, const char *clave) {
-	nodo_abb_t** padre = NULL;
-	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, padre);
+	nodo_abb_t* padre = NULL;
+	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
 	if(!nodo) return NULL;
-	if(!nodo->izq && !nodo->der) {
-		if(nodo == (*padre)->izq) (*padre)->izq = NULL;
-		else (*padre)->der = NULL;		
+	if(nodo == arbol->raiz) arbol->raiz = NULL;
+	else if(!nodo->izq && !nodo->der) {
+		if(nodo == padre->izq) padre->izq = NULL;
+		else padre->der = NULL;		
 	}
 	else if(!nodo->izq || !nodo->der) {
-		if(nodo == (*padre)->izq) {
-			if(nodo->der) (*padre)->izq = nodo->der; 
-			else (*padre)->izq = nodo->izq;
+		if(nodo == padre->izq) {
+			if(nodo->der) padre->izq = nodo->der; 
+			else padre->izq = nodo->izq;
 		} else {
-			if(nodo->der) (*padre)->der = nodo->der;
-			else (*padre)->der = nodo->izq;
+			if(nodo->der) padre->der = nodo->der;
+			else padre->der = nodo->izq;
 		}
 	}
 	else {
@@ -123,6 +128,7 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 		else ant->der = NULL;
 		nodo = act;
 	}
+	arbol->cantidad--;
 	void* dato_a_devolver = nodo->valor;
 	free(nodo->clave);
 	free(nodo);
