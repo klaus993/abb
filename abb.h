@@ -1,7 +1,8 @@
 #ifndef ABB_H
 #define ABB_H
 
-/* ESTTRUCTURA ARBOL BINARIO DE BUSQUEDA */
+#include <stdbool.h>
+#include <stddef.h>
 
 typedef struct abb abb_t;
 
