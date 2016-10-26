@@ -72,21 +72,18 @@ abb_t* abb_crear(abb_comparar_clave_t cmp, abb_destruir_dato_t destruir_dato) {
 }
 
 bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
+	nodo_abb_t* padre = NULL;
+	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
+	if(nodo) {
+		if(arbol->dest) arbol->dest(nodo->valor);
+		nodo->valor = dato;
+		return true;
+	}
 	nodo_abb_t* nodo_nuevo = crear_nodo(clave, dato);
 	if(!nodo_nuevo) return false;
 	if(!arbol->raiz) arbol->raiz = nodo_nuevo;
-	else{
-		nodo_abb_t* padre = NULL;
-		nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
-		if(!nodo) {
-			if(arbol->cmp(clave, nodo->clave) < 0) padre->izq = nodo_nuevo;
-			else padre->der = nodo_nuevo;
-		}
-		else{
-			if(arbol->dest) arbol->dest(nodo->valor);
-			nodo->valor = dato;
-		}
-	}
+	else if(arbol->cmp(clave, padre->clave) < 0) padre->izq = nodo_nuevo;
+	else padre->der = nodo_nuevo;
 	arbol->cantidad++;
 	return true;
 }
