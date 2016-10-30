@@ -81,17 +81,24 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
 	}
 	nodo_abb_t* nodo_nuevo = crear_nodo(clave, dato);
 	if(!nodo_nuevo) return false;
-	if(!arbol->raiz) arbol->raiz = nodo_nuevo;
+	if(!arbol->raiz) {
+		printf("nodo %s\n",*(arbol->raiz->clave));
+		arbol->raiz = nodo_nuevo;
+		printf("nodo %s\n",*(arbol->raiz->clave));
+	}
 	else if(arbol->cmp(clave, padre->clave) < 0) padre->izq = nodo_nuevo;
 	else padre->der = nodo_nuevo;
-	arbol->cantidad++;
+	
 	return true;
 }
 
 void *abb_borrar(abb_t *arbol, const char *clave) {
 	nodo_abb_t* padre = NULL;
 	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
-	if(!nodo) return NULL;
+	if(!nodo) {
+		printf("NOT NODO \n");
+		return NULL;
+	}
 	if(nodo == arbol->raiz) arbol->raiz = NULL;
 	else if(!nodo->izq && !nodo->der) {
 		if(nodo == padre->izq) padre->izq = NULL;
