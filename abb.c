@@ -172,6 +172,9 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol) {
 	}
 	iter->pila = pila;
 	nodo_abb_t* act = arbol->raiz;
+	if (!act) {
+		return iter;
+	}
 	while(act->izq) {
 		pila_apilar(iter->pila, act->clave);
 		act = act->izq;
