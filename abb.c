@@ -83,9 +83,7 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
 	nodo_abb_t* nodo_nuevo = crear_nodo(clave, dato);
 	if(!nodo_nuevo) return false;
 	if(!arbol->raiz) {
-		printf("nodo %s\n",(arbol->raiz->clave));
 		arbol->raiz = nodo_nuevo;
-		printf("nodo %s\n",(arbol->raiz->clave));
 	}
 	else if(arbol->cmp(clave, padre->clave) < 0) padre->izq = nodo_nuevo;
 	else padre->der = nodo_nuevo;
