@@ -97,7 +97,7 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 	nodo_abb_t* padre = NULL;
 	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
 	if(!nodo) {
-		printf("NOT NODO \n");
+		//printf("NOT NODO \n");
 		return NULL;
 	}
 	if(nodo == arbol->raiz) arbol->raiz = NULL;

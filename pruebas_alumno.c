@@ -395,10 +395,10 @@ void pruebas_abb_alumno()
 {
     /* Ejecuta todas las pruebas unitarias. */
     //prueba_crear_abb_vacio();
-    prueba_iterar_abb_vacio();
-   //prueba_crear_abb_vacio();
     //prueba_iterar_abb_vacio();
-    //prueba_abb_insertar();
+    //prueba_crear_abb_vacio();
+    //prueba_iterar_abb_vacio(); //TODO OK hasta aca
+    prueba_abb_insertar();
     //prueba_abb_reemplazar();
     //prueba_abb_reemplazar_con_destruir();
     //prueba_abb_borrar();
