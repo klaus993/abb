@@ -38,15 +38,15 @@ nodo_abb_t* crear_nodo(const char *clave, void* dato){
 }
 
 /* Recibe un puntero a un nodo, otro a una función de comparación, un puntero a
-un char clave y un doble puntero a la raiz. En caso de encontrar un nodo con la
+un char clave y un doble puntero al padre. En caso de encontrar un nodo con la
 clave pasada, se lo devuelve, sino se devuelve NULL. */
-nodo_abb_t* _buscar_nodo(nodo_abb_t* nodo, abb_comparar_clave_t cmp, const char *clave, nodo_abb_t** raiz) {
+nodo_abb_t* _buscar_nodo(nodo_abb_t* nodo, abb_comparar_clave_t cmp, const char *clave, nodo_abb_t** padre) {
 	if(!nodo) return NULL;
 	int res = cmp(clave, nodo->clave);
 	if(res == 0) return nodo;
-	if(raiz) *raiz = nodo;
-	if(res < 0) return _buscar_nodo(nodo->izq, cmp, clave, raiz);
-	return _buscar_nodo(nodo->der, cmp, clave, raiz);
+	if(padre) *padre = nodo;
+	if(res < 0) return _buscar_nodo(nodo->izq, cmp, clave, padre);
+	return _buscar_nodo(nodo->der, cmp, clave, padre);
 }
 
 /* Recibe puntero a un nodo y libera todos los nodos que están por debajo de él,
@@ -89,7 +89,7 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
 	}
 	else if(arbol->cmp(clave, padre->clave) < 0) padre->izq = nodo_nuevo;
 	else padre->der = nodo_nuevo;
-	
+	arbol->cantidad++;
 	return true;
 }
 
