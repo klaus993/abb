@@ -111,8 +111,7 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 			if(nodo->der) padre->der = nodo->der;
 			else padre->der = nodo->izq;
 		}
-	}
-	else {
+	} else {
 		nodo_abb_t* act = nodo->izq;
 		nodo_abb_t* ant;
 		while(act->der) {

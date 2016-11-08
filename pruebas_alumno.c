@@ -96,8 +96,8 @@ static void prueba_abb_reemplazar()
     abb_destruir(abb);
 }
 
-    static void prueba_abb_reemplazar_con_destruir()
-    {
+static void prueba_abb_reemplazar_con_destruir()
+{
         abb_t* abb = abb_crear(strcmp, free);
 
         char *clave1 = "perro", *valor1a, *valor1b;
