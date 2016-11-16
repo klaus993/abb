@@ -41,11 +41,19 @@ nodo_abb_t* crear_nodo(const char *clave, void* dato){
 un char clave y un doble puntero al padre. En caso de encontrar un nodo con la
 clave pasada, se lo devuelve, sino se devuelve NULL. */
 nodo_abb_t* _buscar_nodo(nodo_abb_t* nodo, abb_comparar_clave_t cmp, const char *clave, nodo_abb_t** padre) {
-	if(!nodo) return NULL;
+	if(!nodo) {
+		return NULL;
+	}
 	int res = cmp(clave, nodo->clave);
-	if(res == 0) return nodo;
-	if(padre) *padre = nodo;
-	if(res < 0) return _buscar_nodo(nodo->izq, cmp, clave, padre);
+	if(res == 0) {
+		return nodo;
+	}
+	if(padre) {
+		*padre = nodo;
+	}
+	if(res < 0) {
+		return _buscar_nodo(nodo->izq, cmp, clave, padre);
+	}
 	return _buscar_nodo(nodo->der, cmp, clave, padre);
 }
 
@@ -84,21 +92,22 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
 	if(!nodo_nuevo) return false;
 	if(!arbol->raiz) {
 		arbol->raiz = nodo_nuevo;
+	} else if (arbol->cmp(clave, padre->clave) < 0) {
+		padre->izq = nodo_nuevo;
+	} else {
+		padre->der = nodo_nuevo;
 	}
-	else if(arbol->cmp(clave, padre->clave) < 0) padre->izq = nodo_nuevo;
-	else padre->der = nodo_nuevo;
 	arbol->cantidad++;
 	return true;
 }
 
 void *abb_borrar(abb_t *arbol, const char *clave) {
-	nodo_abb_t* padre = NULL;
+	nodo_abb_t* padre = arbol->raiz;
 	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
 	if(!nodo) {
-		//printf("NOT NODO \n");
 		return NULL;
 	}
-	if(nodo == arbol->raiz) arbol->raiz = NULL;
+	if(nodo == arbol->raiz && !arbol->raiz->izq && !arbol->raiz->der) arbol->raiz = NULL;
 	else if(!nodo->izq && !nodo->der) {
 		if(nodo == padre->izq) padre->izq = NULL;
 		else padre->der = NULL;		
@@ -133,7 +142,7 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 	arbol->cantidad--;
 	void* dato_a_devolver = nodo->valor;
 	free(nodo->clave);
-	free(nodo);
+	//free(nodo);
 	return dato_a_devolver;
 }
 
@@ -169,21 +178,23 @@ abb_iter_t *abb_iter_in_crear(const abb_t *arbol) {
 	}
 	iter->pila = pila;
 	nodo_abb_t* act = arbol->raiz;
-	while(act && act->izq) {
-		pila_apilar(iter->pila, act->clave);
+	while(act) {
+		pila_apilar(iter->pila, act);
 		act = act->izq;
 	}
 	return iter;
 }
 
 bool abb_iter_in_avanzar(abb_iter_t *iter) {
-	if(pila_esta_vacia(iter->pila)) return false;
+	if(pila_esta_vacia(iter->pila)) {
+		return false;
+	}
 	nodo_abb_t* ant = pila_desapilar(iter->pila);
 	if(ant->der) {
-		pila_apilar(iter->pila, ant->der->clave);
+		pila_apilar(iter->pila, ant->der);
 		nodo_abb_t* act = ant->der->izq;
 		while(act) {
-			pila_apilar(iter->pila, act->clave);
+			pila_apilar(iter->pila, act);
 			act = act->izq;
 		}
 	}
@@ -191,8 +202,10 @@ bool abb_iter_in_avanzar(abb_iter_t *iter) {
 }
 
 const char *abb_iter_in_ver_actual(const abb_iter_t *iter) {
-	if(abb_iter_in_al_final(iter)) return NULL;
-	return pila_ver_tope(iter->pila);
+	if(abb_iter_in_al_final(iter)) {
+		return NULL;
+	}
+	return ((nodo_abb_t*)pila_ver_tope(iter->pila))->clave;
 }
 
 bool abb_iter_in_al_final(const abb_iter_t *iter) {
@@ -211,7 +224,7 @@ los subárboles ubicados por debajo de la raíz y un puntero extra para hacer co
 él lo que se prefiera. */
 void _iterar_in_order(nodo_abb_t* nodo, bool visitar(const char *, void *, void *), void *extra) {
 	if(!nodo) return;
-	_iterar_in_order(nodo->izq,visitar, extra);
+	_iterar_in_order(nodo->izq, visitar, extra);
 	visitar(nodo->clave, nodo->valor, extra);
 	_iterar_in_order(nodo->der, visitar, extra);
 }
