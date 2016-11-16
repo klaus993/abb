@@ -107,18 +107,27 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 	if(!nodo) {
 		return NULL;
 	}
-	if(nodo == arbol->raiz && !arbol->raiz->izq && !arbol->raiz->der) arbol->raiz = NULL;
-	else if(!nodo->izq && !nodo->der) {
-		if(nodo == padre->izq) padre->izq = NULL;
-		else padre->der = NULL;		
-	}
-	else if(!nodo->izq || !nodo->der) {
+	if(nodo == arbol->raiz && !nodo->izq && !nodo->der) {
+		arbol->raiz = NULL;
+	} else if(!nodo->izq && !nodo->der) {
 		if(nodo == padre->izq) {
-			if(nodo->der) padre->izq = nodo->der; 
-			else padre->izq = nodo->izq;
+			padre->izq = NULL;
 		} else {
-			if(nodo->der) padre->der = nodo->der;
-			else padre->der = nodo->izq;
+			padre->der = NULL;
+		}
+	} else if ((!nodo->izq || !nodo->der) && nodo != arbol->raiz) {
+		if(nodo == padre->izq) {
+			if(nodo->der) {
+				padre->izq = nodo->der;
+			} else {
+				padre->izq = nodo->izq;
+			}
+		} else {
+			if(nodo->der) {
+				padre->der = nodo->der;
+			} else {
+				padre->der = nodo->izq;
+			}
 		}
 	} else {
 		nodo_abb_t* act = nodo->izq;
@@ -140,10 +149,10 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 		nodo = act;
 	}
 	arbol->cantidad--;
-	void* dato_a_devolver = nodo->valor;
+	void* dato = nodo->valor;
 	free(nodo->clave);
 	//free(nodo);
-	return dato_a_devolver;
+	return dato;
 }
 
 void *abb_obtener(const abb_t *arbol, const char *clave) {
@@ -153,8 +162,7 @@ void *abb_obtener(const abb_t *arbol, const char *clave) {
 }	
 
 bool abb_pertenece(const abb_t *arbol, const char *clave) {
-	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, NULL);
-	return nodo;
+	return _buscar_nodo(arbol->raiz, arbol->cmp, clave, NULL) != NULL;
 }
 
 size_t abb_cantidad(abb_t *arbol) {
