@@ -101,6 +101,22 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
 	return true;
 }
 
+nodo_abb_t *buscar_max(nodo_abb_t *raiz) {
+	if (!raiz->der) {
+		return raiz;
+	}
+	return buscar_max(raiz->der);
+}
+
+void intercambiar(nodo_abb_t *nodo) {
+	nodo_abb_t *max = buscar_max(nodo->izq);
+	if (!max->izq && !max->der) {
+		return;
+	}
+	nodo->clave = max->clave;
+	nodo->valor = max->valor;
+}
+
 void *abb_borrar(abb_t *arbol, const char *clave) {
 	nodo_abb_t* padre = arbol->raiz;
 	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
@@ -144,14 +160,17 @@ void *abb_borrar(abb_t *arbol, const char *clave) {
 		auxvalor = nodo->valor;
 		nodo->valor = act->valor;
 		act->valor = auxvalor;
-		if(act->izq) ant->der = act->izq;
-		else ant->der = NULL;
+		if(act->izq) {
+			ant->der = act->izq;
+		} else {
+			ant->der = NULL;
+		}
 		nodo = act;
 	}
 	arbol->cantidad--;
 	void* dato = nodo->valor;
 	free(nodo->clave);
-	//free(nodo);
+	free(nodo);
 	return dato;
 }
 
