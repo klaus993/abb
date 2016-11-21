@@ -38,8 +38,8 @@ nodo_abb_t* crear_nodo(const char *clave, void* dato){
 }
 
 /* Recibe un puntero a un nodo, otro a una función de comparación, un puntero a
-un char clave y un doble puntero al padre. En caso de encontrar un nodo con la
-clave pasada, se lo devuelve, sino se devuelve NULL. */
+un char clave y un doble puntero extra, donde se almacenará el padre del nodo a buscar.
+En caso de encontrar un nodo con la clave pasada, se lo devuelve, sino se devuelve NULL. */
 nodo_abb_t* _buscar_nodo(nodo_abb_t* nodo, abb_comparar_clave_t cmp, const char *clave, nodo_abb_t** padre) {
 	if(!nodo) {
 		return NULL;
@@ -58,14 +58,14 @@ nodo_abb_t* _buscar_nodo(nodo_abb_t* nodo, abb_comparar_clave_t cmp, const char 
 }
 
 /* Recibe puntero a un nodo y libera todos los nodos que están por debajo de él,
-junto con los datos dinámicos almacenados en el árbol. */
+junto con los datos dinámicos almacenados en el árbol (si los hay). */
 void _liberar_datos_y_nodos(nodo_abb_t *nodo, abb_destruir_dato_t destruir_dato) {
 	if(!nodo) return;
 	_liberar_datos_y_nodos(nodo->izq, destruir_dato);
+	_liberar_datos_y_nodos(nodo->der, destruir_dato);
 	if(destruir_dato) destruir_dato(nodo->valor);
 	free(nodo->clave);
 	free(nodo);
-	_liberar_datos_y_nodos(nodo->der, destruir_dato);
 }
 
 //PRIMITIVAS ÁRBOL BINARIO DE BÚSQUEDA.
@@ -101,77 +101,64 @@ bool abb_guardar(abb_t *arbol, const char *clave, void *dato) {
 	return true;
 }
 
-nodo_abb_t *buscar_max(nodo_abb_t *raiz) {
-	if (!raiz->der) {
+/* Busca la mínima clave en un árbol o subárbol que empieza en la raíz dada.
+Post: devuelve un puntero al nodo mínimo.
+*/
+nodo_abb_t *buscar_min(nodo_abb_t *raiz) {
+	if (!raiz->izq) {
 		return raiz;
 	}
-	return buscar_max(raiz->der);
+	return buscar_min(raiz->izq);
 }
 
-void intercambiar(nodo_abb_t *nodo) {
-	nodo_abb_t *max = buscar_max(nodo->izq);
-	if (!max->izq && !max->der) {
-		return;
+/* Recibe la raíz de un árbol, la clave a borrar y una función de comparación.
+Busca el nodo a borrar, recursivamente, y luego se ocupa de borrarlo cambiando las referencias
+que sean necesarias para que se sigan cumpliendo las condiciones de ABB.
+Post: devuelve la raíz del árbol sin el nodo cuya clave se pasó por parámetro, cumpliendo las
+condiciones de ABB.
+*/
+nodo_abb_t *_abb_borrar(nodo_abb_t *raiz, const char *clave, abb_comparar_clave_t cmp) {
+	if (!raiz) {
+		return raiz;
 	}
-	nodo->clave = max->clave;
-	nodo->valor = max->valor;
+	int res = cmp(clave, raiz->clave);
+	nodo_abb_t *tmp;
+	if (res < 0) {
+		raiz->izq = _abb_borrar(raiz->izq, clave, cmp);
+	} else if (res > 0) {
+		raiz->der = _abb_borrar(raiz->der, clave, cmp);
+	} else {
+		if (!raiz->izq) {
+			tmp = raiz->der;
+			free(raiz->clave);
+			free(raiz);
+			return tmp;
+		}
+		if (!raiz->der) {
+			tmp = raiz->izq;
+			free(raiz->clave);
+			free(raiz);
+			return tmp;
+		}
+		tmp = buscar_min(raiz->der);
+		free(raiz->clave);
+		raiz->clave = tmp->clave;
+		raiz->valor = tmp->valor;
+		raiz->der = _abb_borrar(raiz->der, tmp->clave, cmp);
+	}
+	return raiz;
 }
 
 void *abb_borrar(abb_t *arbol, const char *clave) {
-	nodo_abb_t* padre = arbol->raiz;
-	nodo_abb_t* nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
-	if(!nodo) {
+	nodo_abb_t *padre = NULL;
+	nodo_abb_t *nodo = _buscar_nodo(arbol->raiz, arbol->cmp, clave, &padre);
+	if (!nodo) {
 		return NULL;
 	}
-	if(nodo == arbol->raiz && !nodo->izq && !nodo->der) {
-		arbol->raiz = NULL;
-	} else if(!nodo->izq && !nodo->der) {
-		if(nodo == padre->izq) {
-			padre->izq = NULL;
-		} else {
-			padre->der = NULL;
-		}
-	} else if ((!nodo->izq || !nodo->der) && nodo != arbol->raiz) {
-		if(nodo == padre->izq) {
-			if(nodo->der) {
-				padre->izq = nodo->der;
-			} else {
-				padre->izq = nodo->izq;
-			}
-		} else {
-			if(nodo->der) {
-				padre->der = nodo->der;
-			} else {
-				padre->der = nodo->izq;
-			}
-		}
-	} else {
-		nodo_abb_t* act = nodo->izq;
-		nodo_abb_t* ant;
-		while(act->der) {
-			ant = act;
-			act = act->der;
-		}
-		char* auxclave;
-		void* auxvalor;
-		auxclave = nodo->clave;
-		nodo->clave = act->clave;
-		act->clave = auxclave;
-		auxvalor = nodo->valor;
-		nodo->valor = act->valor;
-		act->valor = auxvalor;
-		if(act->izq) {
-			ant->der = act->izq;
-		} else {
-			ant->der = NULL;
-		}
-		nodo = act;
-	}
+	void *tmp = nodo->valor;
+	arbol->raiz = _abb_borrar(arbol->raiz, clave, arbol->cmp);
 	arbol->cantidad--;
-	void* dato = nodo->valor;
-	free(nodo->clave);
-	free(nodo);
-	return dato;
+	return tmp;
 }
 
 void *abb_obtener(const abb_t *arbol, const char *clave) {
@@ -240,14 +227,13 @@ bool abb_iter_in_al_final(const abb_iter_t *iter) {
 }
 
 void abb_iter_in_destruir(abb_iter_t* iter) {
-	free(iter->pila);
+	pila_destruir(iter->pila);
 	free(iter);
 }
 
 //PRIMITIVA DEL ITERADOR INTERNO DEL ÁRBOL.
 
-/* Recibe un puntero a una raíz de un árbol, una función visitar para modificar 
-los subárboles ubicados por debajo de la raíz y un puntero extra para hacer con
+/* Recibe un puntero a una raíz de un árbol, una función visitar y un puntero extra para hacer con
 él lo que se prefiera. */
 void _iterar_in_order(nodo_abb_t* nodo, bool visitar(const char *, void *, void *), void *extra) {
 	if(!nodo) return;

@@ -323,7 +323,7 @@ static void prueba_abb_iter_in_iterar()
     abb_destruir(abb);
 }
 
-static void prueba_abb_iter_inar_volumen(size_t largo)
+static void prueba_abb_iter_in_iterar_volumen(size_t largo)
 {
     abb_t* abb = abb_crear(strcmp, NULL);
 
@@ -394,22 +394,22 @@ static void prueba_abb_iter_inar_volumen(size_t largo)
 void pruebas_abb_alumno()
 {
     /* Ejecuta todas las pruebas unitarias. */
-    /*prueba_crear_abb_vacio();
+    prueba_crear_abb_vacio();
     prueba_iterar_abb_vacio();
     prueba_crear_abb_vacio();
     prueba_iterar_abb_vacio();
     prueba_abb_insertar();
     prueba_abb_reemplazar();
-    prueba_abb_reemplazar_con_destruir(); //TODO OK HASTA ACA*/
+    prueba_abb_reemplazar_con_destruir(); //TODO OK HASTA ACA
     prueba_abb_borrar(); //OK
-    /*prueba_abb_clave_vacia(); //OK
+    prueba_abb_clave_vacia(); //OK
     prueba_abb_valor_null(); //OK 
-    //prueba_abb_volumen(5000, true);
+    prueba_abb_volumen(5000, true);
     prueba_abb_iter_in_iterar();
-    //prueba_abb_iter_in_iterar_volumen(5000);*/
+    prueba_abb_iter_in_iterar_volumen(5000);
 }
 
-/*void pruebas_volumen_catedra(size_t largo)
+void pruebas_volumen_catedra(size_t largo)
 {
     prueba_abb_volumen(largo, false);
-}*/
+}
