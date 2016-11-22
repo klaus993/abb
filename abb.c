@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 200809L
 #include "abb.h"
 #include "pila.h"
 #include <stdlib.h>
@@ -29,9 +30,7 @@ nodo_abb_t* crear_nodo(const char *clave, void* dato){
 	nodo_abb_t* nodo = malloc(sizeof(nodo_abb_t));
 	if(!nodo) return NULL;
 	nodo->valor = dato;
-	char *clave_copiada = malloc(sizeof(char) * strlen(clave) + 1);
-	strcpy(clave_copiada, clave);
-	nodo->clave = clave_copiada;
+	nodo->clave = strdup(clave);
 	nodo->izq = NULL;
 	nodo->der = NULL;
 	return nodo;
@@ -130,18 +129,20 @@ nodo_abb_t *_abb_borrar(nodo_abb_t *raiz, const char *clave, abb_comparar_clave_
 	} else {
 		if (!raiz->izq) {
 			tmp = raiz->der;
-			free(raiz->clave);
+			if (raiz->clave) free(raiz->clave);
+			raiz->clave = NULL;
 			free(raiz);
 			return tmp;
 		}
 		if (!raiz->der) {
 			tmp = raiz->izq;
-			free(raiz->clave);
+			if (raiz->clave) free(raiz->clave);
+			raiz->clave = NULL;
 			free(raiz);
 			return tmp;
 		}
 		tmp = buscar_min(raiz->der);
-		free(raiz->clave);
+		if (raiz->clave) free(raiz->clave);
 		raiz->clave = tmp->clave;
 		raiz->valor = tmp->valor;
 		raiz->der = _abb_borrar(raiz->der, tmp->clave, cmp);
