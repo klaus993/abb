@@ -202,22 +202,6 @@ static void prueba_abb_valor_null()
     abb_destruir(abb);
 }
 
-/* Desordena aleatoriamente un arreglo de unsigned. */
-void shuffle(unsigned *array, size_t n)
-{
-    if (n > 1) 
-    {
-        unsigned i;
-        for (i = 0; i < n - 1; i++) 
-        {
-          size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-          int t = array[j];
-          array[j] = array[i];
-          array[i] = t;
-        }
-    }
-}
-
 static void prueba_abb_volumen(size_t largo, bool debug)
 {
     abb_t* abb = abb_crear(strcmp, NULL);
@@ -227,19 +211,12 @@ static void prueba_abb_volumen(size_t largo, bool debug)
 
     unsigned* valores[largo];
 
-    unsigned arr[largo];
-    for (unsigned i = 0; i < largo; i++) {
-        arr[i] = i;
-    }
-    /* Desordena los valores a insertar en el abb */
-    shuffle(arr, largo);
-
     /* Inserta 'largo' parejas en el abb */
     bool ok = true;
     for (unsigned i = 0; i < largo; i++) {
         valores[i] = malloc(sizeof(int));
-        sprintf(claves[i], "%08d", arr[i]);
-        *valores[i] = arr[i];
+        sprintf(claves[i], "%08d", i);
+        *valores[i] = i;
         ok = abb_guardar(abb, claves[i], valores[i]);
         if (!ok) break;
     }
@@ -353,20 +330,13 @@ static void prueba_abb_iter_in_iterar_volumen(size_t largo)
     const size_t largo_clave = 10;
     char (*claves)[largo_clave] = malloc(largo * largo_clave);
 
-    unsigned valores[largo];
-
-    unsigned arr[largo];
-    for (unsigned i = 0; i < largo; i++) {
-        arr[i] = i;
-    }
-    /* Desordena los valores a insertar en el abb */
-    shuffle(arr, largo);
+    size_t valores[largo];
 
     /* Inserta 'largo' parejas en el abb */
     bool ok = true;
     for (unsigned i = 0; i < largo; i++) {
-        sprintf(claves[i], "%08d", arr[i]);
-        valores[i] = arr[i];
+        sprintf(claves[i], "%08d", i);
+        valores[i] = i;
         ok = abb_guardar(abb, claves[i], &valores[i]);
         if (!ok) break;
     }
@@ -401,6 +371,15 @@ static void prueba_abb_iter_in_iterar_volumen(size_t largo)
     print_test("Prueba abb iteración en volumen", ok);
     print_test("Prueba abb iteración en volumen, recorrio todo el largo", i == largo);
     print_test("Prueba abb iterador esta al final, es true", abb_iter_in_al_final(iter));
+
+    ok = true;
+    for (i = 0; i < largo; i++) {
+        if ( valores[i] != largo ) {
+            ok = false;
+            break;
+        }
+    }
+    print_test("Prueba abb iteración en volumen, se cambiaron todo los elementos", ok);
 
     free(claves);
     abb_iter_in_destruir(iter);
