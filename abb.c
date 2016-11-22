@@ -129,21 +129,19 @@ nodo_abb_t *_abb_borrar(nodo_abb_t *raiz, const char *clave, abb_comparar_clave_
 	} else {
 		if (!raiz->izq) {
 			tmp = raiz->der;
-			if (raiz->clave) free(raiz->clave);
-			raiz->clave = NULL;
+			free(raiz->clave);
 			free(raiz);
 			return tmp;
 		}
 		if (!raiz->der) {
 			tmp = raiz->izq;
-			if (raiz->clave) free(raiz->clave);
-			raiz->clave = NULL;
+			free(raiz->clave);
 			free(raiz);
 			return tmp;
 		}
 		tmp = buscar_min(raiz->der);
-		if (raiz->clave) free(raiz->clave);
-		raiz->clave = tmp->clave;
+		free(raiz->clave);
+		raiz->clave = strdup(tmp->clave);
 		raiz->valor = tmp->valor;
 		raiz->der = _abb_borrar(raiz->der, tmp->clave, cmp);
 	}
